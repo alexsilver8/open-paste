@@ -1,18 +1,14 @@
-import { memo, useCallback, useEffect, useState, type SubmitEvent } from 'react'
-import {
-	DEFAULT_IGNORED_APPS,
-	DEFAULT_SETTINGS,
-	HISTORY_DAY_OPTIONS,
-	HISTORY_LIMIT_OPTIONS
-} from '@shared/settings'
+import { memo, useCallback, useEffect, useState } from 'react'
+import { HISTORY_DAY_OPTIONS, HISTORY_LIMIT_OPTIONS } from '@shared/settings'
 import type { AppEnv, Permissions, Settings } from '@shared/types'
 import { api } from '@renderer/api'
 import { Icon } from '@renderer/components/icon'
 import { isMac } from '@renderer/env'
 import { Button } from '@renderer/components/button'
-import { Input } from '@renderer/components/input'
 import logoUrl from '@resources/icon.png'
-import { IgnoredApp } from './components/ignored-app'
+import { AccessibilityCallout } from './components/accessibility-callout'
+import { ClearHistory } from './components/clear-history'
+import { IgnoredApps } from './components/ignored-apps'
 import { Row } from './components/row'
 import { ShortcutRecorder } from './components/shortcut-recorder'
 import { Section } from './components/section'
@@ -28,10 +24,6 @@ const SettingsApp = (props: SettingsAppProps) => {
 	const [settings, setSettings] = useState<Settings | null>(null)
 	const [env, setEnv] = useState<AppEnv | null>(null)
 	const [permissions, setPermissions] = useState<Permissions>({ accessibility: null })
-	const [newApp, setNewApp] = useState('')
-	const [confirmClear, setConfirmClear] = useState(false)
-	const [keepPinned, setKeepPinned] = useState(true)
-	const [cleared, setCleared] = useState(false)
 
 	useEffect(() => {
 		const load = (): void => {
@@ -66,29 +58,6 @@ const SettingsApp = (props: SettingsAppProps) => {
 	const setShortcut = useCallback((shortcut: string) => update({ shortcut }), [update])
 
 	if (!settings) return <div className="settings" />
-
-	const addIgnoredApp = (): void => {
-		const name = newApp.trim()
-		if (!name) return
-		update({ ignoredApps: [...settings.ignoredApps, name] })
-		setNewApp('')
-	}
-
-	const handleClearConfirmClick = async () => {
-		await api.clearHistory({ keepPinned })
-		setConfirmClear(false)
-		setCleared(true)
-	}
-
-	const handleClearClick = () => {
-		setCleared(false)
-		setConfirmClear(true)
-	}
-
-	const handleAddAppSubmit = (e: SubmitEvent<HTMLFormElement>) => {
-		e.preventDefault()
-		addIgnoredApp()
-	}
 
 	return (
 		<div className={`settings${embedded ? ' is-embedded' : ''}`}>
@@ -142,16 +111,7 @@ const SettingsApp = (props: SettingsAppProps) => {
 					/>
 				</Row>
 				{isMac && settings.pasteDirectly && permissions.accessibility === false && (
-					<div className="callout" role="note">
-						<Icon name="paste" size={18} />
-						<p>
-							macOS needs your permission before OpenPaste can press ⌘V for you. Turn
-							on OpenPaste under Privacy &amp; Security → Accessibility.
-						</p>
-						<Button onClick={() => api.openAccessibilitySettings()}>
-							Open Accessibility settings
-						</Button>
-					</div>
+					<AccessibilityCallout />
 				)}
 				<Row
 					label="Always paste as plain text"
@@ -210,31 +170,7 @@ const SettingsApp = (props: SettingsAppProps) => {
 						onChange={update}
 					/>
 				</Row>
-				<Row
-					label="Clear history"
-					note={
-						cleared ? 'History cleared.' : 'Deletes recorded items from this computer.'
-					}
-				>
-					{confirmClear ? (
-						<div className="confirm">
-							<label className="check">
-								<input
-									type="checkbox"
-									checked={keepPinned}
-									onChange={(e) => setKeepPinned(e.currentTarget.checked)}
-								/>
-								Keep pinboards
-							</label>
-							<Button onClick={() => setConfirmClear(false)}>Cancel</Button>
-							<Button variant="danger" onClick={handleClearConfirmClick}>
-								Clear history
-							</Button>
-						</div>
-					) : (
-						<Button onClick={handleClearClick}>Clear history…</Button>
-					)}
-				</Row>
+				<ClearHistory />
 			</Section>
 
 			<Section title="Privacy">
@@ -262,47 +198,10 @@ const SettingsApp = (props: SettingsAppProps) => {
 						onChange={update}
 					/>
 				</Row>
-				<div className="row-setting row-setting--stack">
-					<div className="row-setting-text">
-						<span className="row-setting-label">Never record copies from</span>
-						<p className="row-setting-note">
-							Match by app name. Copies made in these apps never reach your history.
-						</p>
-					</div>
-					<ul className="chips" aria-label="Ignored apps">
-						{settings.ignoredApps.map((app) => (
-							<IgnoredApp
-								key={app}
-								app={app}
-								onRemove={(app) =>
-									update({
-										ignoredApps: settings.ignoredApps.filter((a) => a !== app)
-									})
-								}
-							/>
-						))}
-					</ul>
-					<form className="add-app" onSubmit={handleAddAppSubmit}>
-						<Input
-							placeholder="App name, e.g. Keychain Access"
-							value={newApp}
-							onChange={(e) => setNewApp(e.currentTarget.value)}
-						/>
-						<Button type="submit" disabled={!newApp.trim()}>
-							Add app
-						</Button>
-						{settings.ignoredApps.join() !== DEFAULT_IGNORED_APPS.join() && (
-							<Button
-								variant="quiet"
-								onClick={() =>
-									update({ ignoredApps: DEFAULT_SETTINGS.ignoredApps })
-								}
-							>
-								Restore defaults
-							</Button>
-						)}
-					</form>
-				</div>
+				<IgnoredApps
+					ignoredApps={settings.ignoredApps}
+					onChange={(ignoredApps) => update({ ignoredApps })}
+				/>
 			</Section>
 
 			<Section title="About">
