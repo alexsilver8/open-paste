@@ -1,4 +1,4 @@
-import type { MenuEntry } from '@renderer/shelf/shelf-app/components/menu'
+import type { MenuEntry } from '@renderer/shelf/shelf-app/components/shelf-body/components/item-menu/components/menu'
 
 export interface MenuItemProps {
 	entry: Exclude<MenuEntry, 'separator'>

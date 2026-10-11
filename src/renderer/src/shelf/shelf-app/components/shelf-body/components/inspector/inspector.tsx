@@ -1,14 +1,13 @@
-import { memo, useEffect, useRef, useState, type ReactNode, type KeyboardEvent } from 'react'
+import { memo, useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { kindLabel } from '@shared/classify'
 import type { ClipPayload } from '@shared/types'
 import { api } from '@renderer/api'
-import { describeColor } from '@renderer/lib/colors'
-import { absoluteTime, formatBytes, formatCount, hostOf } from '@renderer/lib/format'
-import { highlightCode } from '@renderer/lib/highlight'
 import { Icon } from '@renderer/components/icon'
 import { ENTER, MOD, SHIFT, isMod } from '@renderer/env'
 import { Button } from '@renderer/components/button'
 import { BoardChip } from './components/board-chip'
+import { Content } from './components/content'
+import { Details } from './components/details'
 import { TEXT_KINDS } from './inspector.constants'
 import type { InspectorProps } from './inspector.types'
 
@@ -82,105 +81,6 @@ const Inspector = (props: InspectorProps) => {
 		return () => window.removeEventListener('keydown', onKey, true)
 	})
 
-	const text = payload?.text ?? item.preview
-	const color = item.kind === 'color' ? describeColor(item.color ?? item.preview) : null
-
-	let content: ReactNode
-	if (editing) {
-		content = (
-			<textarea
-				ref={textRef}
-				className="inspector-editor"
-				value={draft}
-				spellCheck={item.kind === 'text'}
-				onChange={(e) => setDraft(e.currentTarget.value)}
-			/>
-		)
-	} else if (item.kind === 'image') {
-		content = (
-			<div className="inspector-image">
-				<img
-					src={item.imageUrl ?? item.thumbUrl}
-					alt={item.title ?? 'Copied image'}
-					draggable={false}
-				/>
-			</div>
-		)
-	} else if (item.kind === 'color' && color) {
-		content = (
-			<div className="inspector-color">
-				<div
-					className="inspector-swatch"
-					style={{ background: item.color, color: color.ink }}
-				>
-					{color.hex}
-				</div>
-				<dl className="inspector-values">
-					{[
-						['Hex', color.hex],
-						['RGB', color.rgb],
-						['HSL', color.hsl],
-						['Copied as', item.color ?? item.preview]
-					].map(([k, v]) => (
-						<div key={k}>
-							<dt>{k}</dt>
-							<dd>{v}</dd>
-						</div>
-					))}
-				</dl>
-			</div>
-		)
-	} else if (item.kind === 'link') {
-		const { host } = hostOf(item.url ?? text)
-		content = (
-			<div className="inspector-link">
-				<p className="inspector-link-host">{host}</p>
-				<p className="inspector-link-url">{item.url ?? text}</p>
-				{item.url && /^https?:/.test(item.url) && (
-					<Button onClick={() => api.openExternal(item.url!)}>
-						<Icon name="external" size={15} /> Open in browser
-					</Button>
-				)}
-			</div>
-		)
-	} else if (item.kind === 'file') {
-		content = (
-			<ul className="inspector-files">
-				{(item.files ?? []).map((f) => (
-					<li key={f}>
-						<Icon name="file" size={15} />
-						<span>{f}</span>
-					</li>
-				))}
-			</ul>
-		)
-	} else {
-		content = (
-			<pre className={`inspector-text${item.kind === 'code' ? ' is-code' : ''}`}>
-				{item.kind === 'code' ? highlightCode(text) : text}
-			</pre>
-		)
-	}
-
-	const details: [string, string][] = [
-		['From', item.source?.name ?? 'Unknown app'],
-		['Copied', absoluteTime(item.createdAt)]
-	]
-	if (item.usedAt - item.createdAt > 60_000)
-		details.push(['Last used', absoluteTime(item.usedAt)])
-	if (item.image) {
-		details.push(
-			['Size', `${item.image.width} × ${item.image.height}`],
-			['File size', formatBytes(item.image.bytes)]
-		)
-	} else if (item.kind === 'file') {
-		details.push(['Items', formatCount(item.size, 'file')])
-	} else {
-		details.push(['Length', formatCount(item.size, 'character')])
-		if ((item.lines ?? 1) > 1) details.push(['Lines', String(item.lines)])
-		if (item.rich) details.push(['Format', 'Rich text (formatting kept)'])
-	}
-
 	const handleTitleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
 		if (e.key === 'Enter') {
 			saveTitle()
@@ -190,7 +90,16 @@ const Inspector = (props: InspectorProps) => {
 
 	return (
 		<section className="inspector" aria-label="Item details">
-			<div className="inspector-main">{content}</div>
+			<div className="inspector-main">
+				<Content
+					item={item}
+					text={payload?.text ?? item.preview}
+					editing={editing}
+					draft={draft}
+					editorRef={textRef}
+					onDraftChange={setDraft}
+				/>
+			</div>
 			<aside className="inspector-side">
 				<div className="inspector-head">
 					<input
@@ -208,14 +117,7 @@ const Inspector = (props: InspectorProps) => {
 						<Icon name="close" />
 					</Button>
 				</div>
-				<dl className="inspector-details">
-					{details.map(([k, v]) => (
-						<div key={k}>
-							<dt>{k}</dt>
-							<dd>{v}</dd>
-						</div>
-					))}
-				</dl>
+				<Details item={item} />
 				{boards.length > 0 && (
 					<div className="inspector-boards" role="group" aria-label="Pinboards">
 						{boards.map((b) => (
