@@ -33,7 +33,7 @@ const KIND_ALIASES: Record<string, ClipKind> = {
  */
 export function parseQuery(input: string): ParsedQuery {
 	const result: ParsedQuery = { terms: [], kinds: [], apps: [] }
-	const tokens = input.match(/"[^"]*"|\S+/g) ?? []
+	const tokens = input.match(/(?:[^\s"]|"[^"]*"|")+/g) ?? []
 	for (const raw of tokens) {
 		const token = raw.startsWith('"') ? raw.slice(1, -1) : raw
 		const filter = /^(is|type|kind|app|from):(.+)$/i.exec(raw)

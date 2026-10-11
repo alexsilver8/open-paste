@@ -51,6 +51,13 @@ describe('parseQuery', () => {
 			apps: ['figma']
 		})
 	})
+	it('keeps a quoted app name with spaces in one filter', () => {
+		expect(parseQuery('app:"Visual Studio Code" hello')).toEqual({
+			terms: ['hello'],
+			kinds: [],
+			apps: ['visual studio code']
+		})
+	})
 	it('treats unknown kinds as text', () => {
 		expect(parseQuery('is:banana').terms).toEqual(['is:banana'])
 	})
