@@ -122,7 +122,7 @@ const pr = (overrides: Record<string, unknown> = {}) => ({
 })
 
 describe('run', () => {
-	const repo = 'alexsilver8/openpaste'
+	const repo = 'alexsilver8/open-paste'
 	const quiet = () => {}
 
 	it('labels and assigns a new pull request', async () => {

@@ -2,17 +2,17 @@
 
 All notable changes to OpenPaste. Versions follow [Semantic Versioning](https://semver.org).
 
-## [1.0.1](https://github.com/alexsilver8/openpaste/compare/v1.0.0...v1.0.1) (2026-10-11)
+## [1.0.1](https://github.com/alexsilver8/open-paste/compare/v1.0.0...v1.0.1) (2026-10-11)
 
 
 ### Bug Fixes
 
-* **shelf:** show the site name for links that contain % ([#22](https://github.com/alexsilver8/openpaste/issues/22)) ([4f87816](https://github.com/alexsilver8/openpaste/commit/4f87816c3ab6c5c176e7cb58dc64a1643780b893))
+* **shelf:** show the site name for links that contain % ([#22](https://github.com/alexsilver8/open-paste/issues/22)) ([4f87816](https://github.com/alexsilver8/open-paste/commit/4f87816c3ab6c5c176e7cb58dc64a1643780b893))
 
 
 ### Documentation
 
-* list every shelf shortcut in the README ([#21](https://github.com/alexsilver8/openpaste/issues/21)) ([48d6680](https://github.com/alexsilver8/openpaste/commit/48d6680eefee9e5da16a4e2b38accd8b3c019fee))
+* list every shelf shortcut in the README ([#21](https://github.com/alexsilver8/open-paste/issues/21)) ([48d6680](https://github.com/alexsilver8/open-paste/commit/48d6680eefee9e5da16a4e2b38accd8b3c019fee))
 
 ## 1.0.0
 

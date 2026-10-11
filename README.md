@@ -2,7 +2,7 @@
 
 # OpenPaste
 
-**[Download OpenPaste](https://github.com/alexsilver8/openpaste/releases/latest)** for macOS,
+**[Download OpenPaste](https://github.com/alexsilver8/open-paste/releases/latest)** for macOS,
 Windows or Linux. Free and open source.
 
 An open-source clipboard manager for macOS, Windows and Linux. Everything you copy lands on a
@@ -61,7 +61,7 @@ into another app.
 ## Install
 
 Download the installer for your system from the
-[latest release](https://github.com/alexsilver8/openpaste/releases/latest):
+[latest release](https://github.com/alexsilver8/open-paste/releases/latest):
 
 | System               | File                                                              |
 | -------------------- | ----------------------------------------------------------------- |
