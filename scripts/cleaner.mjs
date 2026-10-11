@@ -24,6 +24,11 @@ export function isComponentFile(path) {
 	return path.endsWith('.tsx') && basename(path, '.tsx') === basename(dirname(path))
 }
 
+/** A TypeScript file under the renderer, where the import rules apply. Stylesheets are skipped. */
+export function isRendererScriptFile(path) {
+	return path.startsWith(`${RENDERER}/`) && /\.tsx?$/.test(path)
+}
+
 /**
  * The conventions to check. Each rule has an id, a one-line description and fix (shown once per
  * run), the files it applies to, and a check that returns `{ node, message }` for each problem in
@@ -41,6 +46,31 @@ export const RULES = [
 				if (ts.isInterfaceDeclaration(node) || ts.isTypeAliasDeclaration(node)) {
 					const kind = ts.isInterfaceDeclaration(node) ? 'interface' : 'type'
 					problems.push({ node, message: `${kind} ${node.name.text}` })
+				}
+				ts.forEachChild(node, visit)
+			}
+			visit(sourceFile)
+
+			return problems
+		}
+	},
+	{
+		id: 'no-parent-imports',
+		description: "Imports from outside the current folder can't use ../.",
+		fix: 'Use an alias instead: @renderer/…, @shared/… or @resources/…. ./ is fine for files in the same folder or below it.',
+		appliesTo: isRendererScriptFile,
+		check(sourceFile) {
+			const problems = []
+			const visit = (node) => {
+				if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) {
+					const specifier = node.moduleSpecifier
+					if (
+						specifier &&
+						ts.isStringLiteral(specifier) &&
+						(specifier.text === '..' || specifier.text.startsWith('../'))
+					) {
+						problems.push({ node: specifier, message: specifier.text })
+					}
 				}
 				ts.forEachChild(node, visit)
 			}

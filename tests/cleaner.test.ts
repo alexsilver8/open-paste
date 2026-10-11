@@ -72,6 +72,56 @@ describe('no-types-in-components', () => {
 	})
 })
 
+describe('no-parent-imports', () => {
+	const BUTTON = 'src/renderer/src/shelf/shelf-app/components/card/card.tsx'
+
+	it('flags imports and re-exports that start with ../ in renderer .ts and .tsx files', () => {
+		const source = [
+			"import { Button } from '../../components/button'",
+			"import { helper } from '../utils'",
+			"export { thing } from '../../thing'",
+			"export * from '../all'",
+			"import { parent } from '..'"
+		].join('\n')
+
+		expect(checkFile(BUTTON, source)).toEqual([
+			expect.objectContaining({ line: 1, column: 24, rule: 'no-parent-imports' }),
+			expect.objectContaining({ line: 2, column: 24, rule: 'no-parent-imports' }),
+			expect.objectContaining({ line: 3, column: 23, rule: 'no-parent-imports' }),
+			expect.objectContaining({ line: 4, column: 15, rule: 'no-parent-imports' }),
+			expect.objectContaining({ line: 5, column: 24, rule: 'no-parent-imports' })
+		])
+		expect(checkFile(BUTTON, source).map((p) => p.message)).toEqual([
+			'../../components/button',
+			'../utils',
+			'../../thing',
+			'../all',
+			'..'
+		])
+		expect(checkFile('src/renderer/src/main.ts', "import '../x'\n")).toHaveLength(1)
+	})
+
+	it('allows ./ imports, aliases and packages', () => {
+		const source = [
+			"import { Button } from '@renderer/components/button'",
+			"import { BoardTab } from './components/board-tab'",
+			"import { Settings } from '@shared/settings'",
+			"import { icon } from '@resources/icon'",
+			"import { memo } from 'react'",
+			"import { utils } from './lib/../utils'"
+		].join('\n')
+
+		expect(checkFile(BUTTON, source)).toEqual([])
+	})
+
+	it('only checks renderer .ts and .tsx files', () => {
+		const source = "import { x } from '../x'\n"
+
+		expect(checkFile('src/main/index.ts', source)).toEqual([])
+		expect(checkFile('src/renderer/src/style.css', "@import '../theme.css';\n")).toEqual([])
+	})
+})
+
 describe('formatReport', () => {
 	const plain = createColors(false)
 
