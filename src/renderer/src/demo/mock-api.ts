@@ -11,7 +11,7 @@ import type {
 	Pinboard,
 	Settings
 } from '@shared/types'
-import { APP_COLORS, SAMPLE_BOARDS, buildSamples } from './sampleData'
+import { APP_COLORS, SAMPLE_BOARDS, buildSamples } from './sample-data'
 
 /**
  * In-memory stand-in for the Electron bridge, used by the browser demo and `npm run demo`.

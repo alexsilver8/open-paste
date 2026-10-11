@@ -64,6 +64,7 @@ card/
 ├── card.types.ts       its types: props (CardProps) and any others
 ├── card.constants.ts   constants it uses
 ├── card.utils.ts       helper functions it uses
+├── card.hooks.ts       custom hooks it uses
 ├── index.ts            exports the component, plus anything other folders need
 └── components/         components only Card uses, each laid out the same way
     ├── app-mark/
@@ -113,8 +114,9 @@ export default memo(Card)
   of its props (like `MenuEntry` for `Menu`'s entries) and any others, like the shape of a piece
   of state. The component file itself declares no interfaces or types. A component with no types
   has no types file.
-- Top-level constants go in `<name>.constants.ts` (`.tsx` if they contain JSX), and helper
-  functions in `<name>.utils.ts`. Leave out the files a component doesn't need.
+- Top-level constants go in `<name>.constants.ts` (`.tsx` if they contain JSX), helper
+  functions in `<name>.utils.ts` and custom hooks in `<name>.hooks.ts`. Leave out the files a
+  component doesn't need.
 - A component used only by one parent lives in that parent's `components/` folder. Components
   used in several places live in `src/renderer/src/components/`.
 - Import a component's folder (`'./components/card'`), not the files inside it.
